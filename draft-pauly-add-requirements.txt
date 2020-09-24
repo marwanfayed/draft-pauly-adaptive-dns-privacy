@@ -5,13 +5,13 @@
 Network Working Group                                           T. Pauly
 Internet-Draft                                                E. Kinnear
 Intended status: Informational                                Apple Inc.
-Expires: 19 February 2021                                      C.A. Wood
+Expires: 28 March 2021                                         C.A. Wood
                                                               Cloudflare
                                                               P. McManus
                                                                   Fastly
                                                                T. Jensen
                                                                Microsoft
-                                                          18 August 2020
+                                                       24 September 2020
 
 
                   Adaptive DNS Discovery Requirements
@@ -40,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 February 2021.
+   This Internet-Draft will expire on 28 March 2021.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 1]
+Pauly, et al.             Expires 28 March 2021                 [Page 1]
 
-Internet-Draft              ADD Requirements                 August 2020
+Internet-Draft              ADD Requirements              September 2020
 
 
    Please review these documents carefully, as they describe your rights
@@ -75,10 +75,10 @@ Table of Contents
      2.4.  Encrypted resolvers for private names . . . . . . . . . .   4
      2.5.  Encrypted resolvers for local or home content . . . . . .   5
      2.6.  Encrypted resolvers for content providers . . . . . . . .   5
-   3.  Distilled discovery mechanisms  . . . . . . . . . . . . . . .   6
+   3.  Discovery mechanisms  . . . . . . . . . . . . . . . . . . . .   6
    4.  Privacy and security requirements . . . . . . . . . . . . . .   6
-     4.1.  Role of opportunistic encryption  . . . . . . . . . . . .   7
-     4.2.  Handling exceptions and failures  . . . . . . . . . . . .   7
+     4.1.  On opportunistic encryption . . . . . . . . . . . . . . .   7
+     4.2.  Handling exceptions and failures  . . . . . . . . . . . .   8
    5.  Informative References  . . . . . . . . . . . . . . . . . . .   8
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
 
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 2]
+Pauly, et al.             Expires 28 March 2021                 [Page 2]
 
-Internet-Draft              ADD Requirements                 August 2020
+Internet-Draft              ADD Requirements              September 2020
 
 
 1.1.  Specification of Requirements
@@ -159,17 +159,19 @@ Internet-Draft              ADD Requirements                 August 2020
    specific DNS resolver to use on certain networks, or on all networks.
    Historically, this selection was specified only with an IP address.
 
+
+
+
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 3]
+
+Internet-Draft              ADD Requirements              September 2020
+
+
    Discovering if the selected resolver supports encryption, along with
    the configuration for the encrypted resolver, allows the client to
-
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 3]
-
-Internet-Draft              ADD Requirements                 August 2020
-
-
    "upgrade" connections to use encrypted DNS.  This can provide several
    benefits:
 
@@ -216,16 +218,16 @@ Internet-Draft              ADD Requirements                 August 2020
    enterprise that fall within a limited set of domains, if there is a
    more preferred option for generic Internet traffic.
 
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 4]
+
+Internet-Draft              ADD Requirements              September 2020
+
+
    Using encrypted DNS for private names also opens up the possibility
    of doing private name resolution outside of the content of a VPN or
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 4]
-
-Internet-Draft              ADD Requirements                 August 2020
-
-
    managed network.  If the DNS resolver authenticates clients, it can
    offer its resolver for private names on a publicly accessible server,
    while still limiting the visibility of the DNS traffic.
@@ -246,7 +248,7 @@ Internet-Draft              ADD Requirements                 August 2020
    *  the network-provisioned encrypted resolver is not able to resolve
       local-only names, or
 
-   *  the client has a more-prerred encrypted resolver for generic
+   *  the client has a more-preferred encrypted resolver for generic
       traffic, and would otherwise not be able to access local content
 
    This case also include accessing content specific to a home network.
@@ -272,97 +274,125 @@ Internet-Draft              ADD Requirements                 August 2020
    *  Verify that answers come from the entity that manages the domains
       being resolved
 
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 5]
+
+Internet-Draft              ADD Requirements              September 2020
+
+
    *  Reduce the number of entities able to monitor the specific names
       accessed by a client to only the client and the content provider,
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 5]
-
-Internet-Draft              ADD Requirements                 August 2020
-
-
       assuming that the content provider would already see the names
       upon a secure connection later being made based on the DNS answers
       (e.g., in the TLS SNI extension)
 
-3.  Distilled discovery mechanisms
+3.  Discovery mechanisms
 
-   The various use cases described in Section 2 do not all necessarily
-   require separate mechanisms.
+   The use cases described in Section 2 do not all necessarily require
+   separate mechanisms.
 
-   Generally, the use cases can be summarized in two catgories:
+   Generally, the use cases can be summarized in two categories:
 
-   1.  Discover encrypted resolvers equivalent to (or associated with)
-       unencrypted resolvers.  (Network-provisioned, client-selected,
-       VPN)
+   1.  Resolver upgrade: Discover encrypted resolvers equivalent to (or
+       associated with) unencrypted resolvers.  Examples include
+       network-provisioned, client-selected, and VPN-configured
+       resolvers.
 
-   2.  Discover encrypted resolvers applicability to a limited set of
-       domains.  (Private names, local content, CDN content)
+   2.  Domain-specific resolvers: Discover encrypted resolvers
+       applicable to a limited set of domains.  Examples include
+       resolvers for enterprise or private names, local content, and CDN
+       content.
 
-   For the first group, mechanisms to discover equivalent resolvers can
-   either add new parameters to existing provisioning mechanisms (adding
-   necessary information to use DoT or DoH to options in DHCP, RAs, or
-   IKEv2) or else provide a way to communicate with a provisioned
-   unencrypted DNS resolver and discover the equivalent or associated
-   encrypted DNS resolver.
+   Resolver upgrade mechanisms can either add new parameters to existing
+   provisioning mechanisms (adding necessary information to use DoT or
+   DoH to options in DHCP, RAs, or IKEv2) or else provide a way to
+   communicate with a provisioned unencrypted DNS resolver and discover
+   the equivalent or associated encrypted DNS resolver.
 
-   For the second group, mechanisms additionally need to provide some
-   information about the applicability and capabilities of encrypted
-   resolvers.  This information could either be provisioned, or be
-   discovered based on clients actively trying to access content.
+   Domain-specific resolver discovery mechanisms additionally need to
+   provide some information about the applicability and capabilities of
+   encrypted resolvers.  This information can either be provisioned or
+   can be discovered based on clients actively trying to access content.
 
 4.  Privacy and security requirements
 
-   Since one of the main reasons for enabling encrypted DNS on clients
-   is to improve the privacy and security properties of DNS queries,
-   discovery mechanisms must be designed carefully to not weaken a
-   client's security or privacy.
+   Encrypted DNS improves the privacy and security of DNS queries and
+   answers in the presence of malicious attackers.  Such attackers are
+   assumed to interfere with or otherwise impede DNS traffic and
+   corresponding discovery mechanisms.  They may be on-path or off-path
+   between the client and entities with which the client communicates
+   [RFC3552].  These attackers can inject, tamper, or otherwise
+   interfere with traffic as needed.  Given these capabilities, an
+   attacker may have a variety of goals, including, though not limited
+   to:
 
-   *  Clients are always responsible for selecting which resolver(s) to
-      use.  Standards describing resolver discovery mechanisms must not
-      place any requirements on clients to select some resolvers instead
-      of other resolvers.
-
-   *  User or administrator preference must always be able to override
-      any discovery mechanism.  Networks may block connectivity to the
-      resolver chosen by the user, but that does not mean that systems
-      should ignore user preference.
+   *  Monitor and profile clients by observing unencrypted DNS traffic
 
 
 
 
-
-Pauly, et al.           Expires 19 February 2021                [Page 6]
+Pauly, et al.             Expires 28 March 2021                 [Page 6]
 
-Internet-Draft              ADD Requirements                 August 2020
+Internet-Draft              ADD Requirements              September 2020
 
 
-   *  Automatic discovery mechanisms must be tied to an entity that is
-      already otherwise involved in providing service to the client,
-      such as: a network provider, a VPN server, a content provider
-      being accessed, or a server that the client has manually
-      configured.
+   *  Modify unencrypted DNS traffic to filter or augment the user
+      experience
 
-   *  The relationship between a discovered resolver and the client-
-      known entity must be securely authenticated.
+   *  Block encrypted DNS
 
-   *  Discovery mechanisms must not allow an attacker not associated
-      with the client-known entity to successfully redirect DNS traffic
-      to themselves.
+   Clients cannot assume that their network does not have such an
+   attacker unless given some means of authenticating or otherwise
+   trusting the communication with their DNS resolver.
 
-4.1.  Role of opportunistic encryption
+   Given this type of attacker, resolver discovery mechanisms must be
+   designed carefully to not worsen a client's security or privacy
+   posture.  In particular, attackers must not be able to:
+
+   *  Redirect DNS traffic to themselves.
+
+   *  Override or interfere with the resolver preferences of a user or
+      administrator.
+
+   *  Cause clients to use a discovered resolver which has no
+      authenticated delegation from a client-known entity.
+
+   *  Influence automatic discovery mechanisms such that a client uses
+      one or more resolvers that are not otherwise involved with
+      providing service to the client, such as: a network provider, a
+      VPN server, a content provider being accessed, or a server that
+      the client has manually configured.
+
+   Beyond these requirements, standards describing resolver discovery
+   mechanisms must not place any requirements on clients to select
+   particular resolvers over others.
+
+4.1.  On opportunistic encryption
 
    Opportunistic encrypted DNS, when the client cannot authenticate the
    entity that provides encrypted DNS, does not meet the requirements
    laid out here for resolver discovery.  While opportunistic encryption
    can provide some benefits, specifically in reducing the ability for
-   other entities to observe traffic, it opens up avenues for on-path
-   attackers.
+   other entities to observe traffic, it is not a viable solution
+   against an on-path attacker.
 
    Performing opportunistic encrypted DNS does not require specific
    discovery mechanisms.  Section 4.1 of [RFC7858] already describes how
-   to use DNS-over-TLS opporunistically.
+   to use DNS-over-TLS opportunistically.
+
+
+
+
+
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 7]
+
+Internet-Draft              ADD Requirements              September 2020
+
 
 4.2.  Handling exceptions and failures
 
@@ -383,17 +413,9 @@ Internet-Draft              ADD Requirements                 August 2020
    good candidates for failing open, since they do not generally
    represent user traffic.
 
-   Other networks may not allow any use of encypted DNS, or any use of
+   Other networks may not allow any use of encrypted DNS, or any use of
    encrypted DNS to resolvers other than a network-provisioned resolver.
    Clients should not silently fail open in these cases, but if these
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 7]
-
-Internet-Draft              ADD Requirements                 August 2020
-
-
    networks are trusted by or administered by the user, the user may
    want to specifically follow the network's DNS policy instead of what
    the client would do on an unknown or untrusted network.
@@ -403,9 +425,9 @@ Internet-Draft              ADD Requirements                 August 2020
    [I-D.ietf-capport-architecture]
               Larose, K., Dolson, D., and H. Liu, "Captive Portal
               Architecture", Work in Progress, Internet-Draft, draft-
-              ietf-capport-architecture-09, 8 August 2020,
+              ietf-capport-architecture-10, 23 September 2020,
               <http://www.ietf.org/internet-drafts/draft-ietf-capport-
-              architecture-09.txt>.
+              architecture-10.txt>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -415,6 +437,18 @@ Internet-Draft              ADD Requirements                 August 2020
    [RFC2132]  Alexander, S. and R. Droms, "DHCP Options and BOOTP Vendor
               Extensions", RFC 2132, DOI 10.17487/RFC2132, March 1997,
               <https://www.rfc-editor.org/info/rfc2132>.
+
+   [RFC3552]  Rescorla, E. and B. Korver, "Guidelines for Writing RFC
+              Text on Security Considerations", BCP 72, RFC 3552,
+              DOI 10.17487/RFC3552, July 2003,
+              <https://www.rfc-editor.org/info/rfc3552>.
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 8]
+
+Internet-Draft              ADD Requirements              September 2020
+
 
    [RFC7296]  Kaufman, C., Hoffman, P., Nir, Y., Eronen, P., and T.
               Kivinen, "Internet Key Exchange Protocol Version 2
@@ -441,15 +475,6 @@ Internet-Draft              ADD Requirements                 August 2020
 
    [RFC8598]  Pauly, T. and P. Wouters, "Split DNS Configuration for the
               Internet Key Exchange Protocol Version 2 (IKEv2)",
-
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 8]
-
-Internet-Draft              ADD Requirements                 August 2020
-
-
               RFC 8598, DOI 10.17487/RFC8598, May 2019,
               <https://www.rfc-editor.org/info/rfc8598>.
 
@@ -471,6 +496,14 @@ Authors' Addresses
    United States of America
 
    Email: ekinnear@apple.com
+
+
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 9]
+
+Internet-Draft              ADD Requirements              September 2020
 
 
    Christopher A. Wood
@@ -501,4 +534,27 @@ Authors' Addresses
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 9]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pauly, et al.             Expires 28 March 2021                [Page 10]

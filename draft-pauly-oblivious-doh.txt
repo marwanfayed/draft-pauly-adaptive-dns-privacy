@@ -5,11 +5,12 @@
 Network Working Group                                         E. Kinnear
 Internet-Draft                                                Apple Inc.
 Intended status: Standards Track                              P. McManus
-Expires: 19 February 2021                                         Fastly
+Expires: 28 March 2021                                            Fastly
                                                                 T. Pauly
-                                                               C.A. Wood
                                                               Apple Inc.
-                                                          18 August 2020
+                                                               C.A. Wood
+                                                              Cloudflare
+                                                       24 September 2020
 
 
                         Oblivious DNS Over HTTPS
@@ -38,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 February 2021.
+   This Internet-Draft will expire on 28 March 2021.
 
 Copyright Notice
 
@@ -49,15 +50,15 @@ Copyright Notice
    Provisions Relating to IETF Documents (https://trustee.ietf.org/
    license-info) in effect on the date of publication of this document.
    Please review these documents carefully, as they describe your rights
-   and restrictions with respect to this document.  Code Components
 
 
 
-Kinnear, et al.         Expires 19 February 2021                [Page 1]
+Kinnear, et al.           Expires 28 March 2021                 [Page 1]
 
-Internet-Draft                Oblivious DoH                  August 2020
+Internet-Draft                Oblivious DoH               September 2020
 
 
+   and restrictions with respect to this document.  Code Components
    extracted from this document must include Simplified BSD License text
    as described in Section 4.e of the Trust Legal Provisions and are
    provided without warranty as described in the Simplified BSD License.
@@ -74,21 +75,21 @@ Table of Contents
      4.3.  HTTP Response . . . . . . . . . . . . . . . . . . . . . .   6
      4.4.  HTTP Response Example . . . . . . . . . . . . . . . . . .   6
    5.  Public Key Discovery  . . . . . . . . . . . . . . . . . . . .   6
-   6.  Oblivious DoH Public Key Format . . . . . . . . . . . . . . .   6
-   7.  Oblivious DoH Message Format  . . . . . . . . . . . . . . . .   7
-     7.1.  Oblivious Queries . . . . . . . . . . . . . . . . . . . .   7
-     7.2.  Oblivious Responses . . . . . . . . . . . . . . . . . . .   8
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  10
-     8.1.  Denial of Service . . . . . . . . . . . . . . . . . . . .  11
-     8.2.  General Proxy Services  . . . . . . . . . . . . . . . . .  11
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
-     9.1.  Oblivious DoH Message Media Type  . . . . . . . . . . . .  11
-     9.2.  Oblivious DoH Public Key DNS Parameter  . . . . . . . . .  12
-   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  13
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  13
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  14
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
+   6.  Oblivious DoH Public Key Format . . . . . . . . . . . . . . .   7
+   7.  Oblivious DoH Message Format  . . . . . . . . . . . . . . . .   8
+     7.1.  Oblivious Queries . . . . . . . . . . . . . . . . . . . .   9
+     7.2.  Oblivious Responses . . . . . . . . . . . . . . . . . . .  10
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
+     8.1.  Denial of Service . . . . . . . . . . . . . . . . . . . .  12
+     8.2.  General Proxy Services  . . . . . . . . . . . . . . . . .  13
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
+     9.1.  Oblivious DoH Message Media Type  . . . . . . . . . . . .  13
+     9.2.  Oblivious DoH Public Key DNS Parameter  . . . . . . . . .  14
+   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  14
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  14
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  15
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
 
 1.  Introduction
 
@@ -103,16 +104,19 @@ Table of Contents
    local IP address, and thus information about the identity or location
    of the client.
 
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 2]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
    Proposals such as Oblivious DNS ([I-D.annee-dprive-oblivious-dns])
    allow increased privacy by not allowing any single DNS server to be
    aware of both the client IP address and the message contents.
-
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 2]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
 
    This document defines Oblivious DoH, an extension to DoH that allows
    for a proxied mode of resolution, in which DNS messages are encrypted
@@ -156,25 +160,27 @@ Internet-Draft                Oblivious DoH                  August 2020
       guarantee that only the intended Oblivious Target can decrypt
       client queries.
 
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 3]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
    *  Client ability to generate random [RFC4086] one-time-use symmetric
       keys to encrypt DNS responses.  These symmetric keys ensure that
       only the client will be able to decrypt the response from the
       Oblivious Target.  They are only used once to prevent the
       Oblivious Target from tracking clients based on keys.
 
-
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 3]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
-
    The mechanism for discovering and provisioning the DoH URI Templates
    and public keys is via parameters added to DNS resource records.  The
-   mechanism for discovering the public key is decribed in Section 5.
+   mechanism for discovering the public key is described in Section 5.
    The mechanism for discovering a DoH URI Template is described in
-   [I-D.pauly-dprive-adaptive-dns-privacy].
+   [I-D.pauly-add-resolver-discovery].
 
 4.  HTTP Exchange
 
@@ -209,6 +215,17 @@ Internet-Draft                Oblivious DoH                  August 2020
    Oblivious Target's DoH server is running.  See Section 4.2 for an
    example request.
 
+
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 4]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
    Oblivious DoH messages have no cache value since both requests and
    responses are encrypted using ephemeral key material.  Clients SHOULD
    prefer using HTTP methods and headers that will prevent unhelpful
@@ -217,15 +234,6 @@ Internet-Draft                Oblivious DoH                  August 2020
 
    Clients MUST set the HTTP Content-Type header to "application/
    oblivious-dns-message" to indicate that this request is an Oblivious
-
-
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 4]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
-
    DoH query intended for proxying.  Clients also SHOULD set this same
    value for the HTTP Accept header.
 
@@ -247,19 +255,32 @@ Internet-Draft                Oblivious DoH                  August 2020
    The URI template for the Oblivious Target is
    "https://dnstarget.example.net/dns-query".
 
-   :method = POST
-   :scheme = https
-   :authority = dnsproxy.example.net
-   :path = /dns-query?targethost=dnstarget.example.net&targetpath=/dns-query
-   accept = application/oblivious-dns-message
-   cache-control = no-cache, no-store
-   content-type = application/oblivious-dns-message
-   content-length = 106
+:method = POST
+:scheme = https
+:authority = dnsproxy.example.net
+:path = /dns-query?targethost=dnstarget.example.net&targetpath=/dns-query
+accept = application/oblivious-dns-message
+cache-control = no-cache, no-store
+content-type = application/oblivious-dns-message
+content-length = 106
 
-   <Bytes containing the encrypted payload for an Oblivious DNS query>
+<Bytes containing the encrypted payload for an Oblivious DNS query>
 
    The Oblivious Proxy then sends the following request on to the
    Oblivious Target:
+
+
+
+
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 5]
+
+Internet-Draft                Oblivious DoH               September 2020
+
 
    :method = POST
    :scheme = https
@@ -271,16 +292,6 @@ Internet-Draft                Oblivious DoH                  August 2020
    content-length = 106
 
    <Bytes containing the encrypted payload for an Oblivious DNS query>
-
-
-
-
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 5]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
 
 4.3.  HTTP Response
 
@@ -304,23 +315,33 @@ Internet-Draft                Oblivious DoH                  August 2020
    The following example shows a response that can be sent from an
    Oblivious Target to a client via an Oblivious Proxy.
 
-   :status = 200
-   content-type = application/oblivious-dns-message
-   content-length = 154
+  :status = 200
+  content-type = application/oblivious-dns-message
+  content-length = 154
 
-   <Bytes containing the encrypted payload for an Oblivious DNS response>
+  <Bytes containing the encrypted payload for an Oblivious DNS response>
 
 5.  Public Key Discovery
 
    In order to use a DoH server as an Oblivious Target, the client must
    know a public key to use for encrypting its queries.  This key can be
    discovered using the SVCB or HTTPSSVC record type
-   ([I-D.nygren-dnsop-svcb-httpssvc]) for a name owned by the server.
+   ([I-D.ietf-dnsop-svcb-https]) for a name owned by the server.
 
-   The Service Binding key name is "odohkey" (Section 9).  If present,
-   this key/value pair contains the public key to use when encrypting
-   Oblivious DoH messages that will be targeted at a DoH server.  The
-   format of the key is defined in (Section 6).
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 6]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
+   The Service Binding key name is "odohconfig" (Section 9).  If
+   present, this key/value pair contains the public key to use when
+   encrypting Oblivious DoH messages that will be targeted at a DoH
+   server.  The format of the key is defined in (Section 6).
 
    Clients MUST only use keys that were retrieved from records protected
    by DNSSEC [RFC4033] to encrypt messages to an Oblivious Target.
@@ -330,28 +351,72 @@ Internet-Draft                Oblivious DoH                  August 2020
    An Oblivious DNS public key is a structure encoded, using TLS-style
    encoding [RFC8446], as follows:
 
-
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 6]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
-
    struct {
       uint16 kem_id;
       uint16 kdf_id;
       uint16 aead_id;
       opaque public_key<1..2^16-1>;
-   } ObliviousDNSKey;
+   } ObliviousDoHConfigContents;
 
-   It contains the information needed to encrypt a message under
-   ObliviousDNSKey.public_key such that only the owner of the
-   corresponding private key can decrypt the message.  The values for
-   ObliviousDNSKey.kem_id, ObliviousDNSKey.kdf_id, and
-   ObliviousDNSKey.aead_id are described in [I-D.irtf-cfrg-hpke]
-   Section 7.  For convenience, let Identifier(ObliviousDNSKey) be
-   defined as the SHA256 value of ObliviousDNSKey serialized.
+   struct {
+      uint16 version;
+      uint16 length;
+      select (ObliviousDoHConfig.version) {
+         case 0xff02: ObliviousDoHConfigContents contents;
+      }
+   } ObliviousDoHConfig;
+
+   ObliviousDoHConfig ObliviousDoHConfigs<1..2^16-1>;
+
+   The "ObliviousDoHConfigs" structure contains one or more
+   "ObliviousDoHConfig" structures in decreasing order of preference.
+   This allows a server to support multiple versions of Oblivious DoH
+   and multiple sets of Oblivious DoH parameters.
+
+   An "ObliviousDoHConfig" contains a versioned representation of an
+   Oblivious DoH configuration, with the following fields.
+
+   version  The version of Oblivious DoH for which this configuration is
+      used.  Clients MUST ignore any "ObliviousDoHConfig" structure with
+      a version they do not support.
+
+   length  The length, in bytes, of the next field.
+
+   contents  An opaque byte string whose contents depend on the version.
+      For this specification, the contents are an
+      "ObliviousDoHConfigContents" structure.
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 7]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
+   An "ObliviousDoHConfigContents" contains the information needed to
+   encrypt a message under "ObliviousDoHConfigContents.public_key" such
+   that only the owner of the corresponding private key can decrypt the
+   message.  The values for "ObliviousDoHConfigContents.kem_id",
+   "ObliviousDoHConfigContents.kdf_id", and
+   "ObliviousDoHConfigContents.aead_id" are described in
+   [I-D.irtf-cfrg-hpke] Section 7.  The fields in this structure are as
+   follows:
+
+   kem_id  The HPKE KEM identifier corresponding to "public_key".
+      Clients MUST ignore any "ObliviousDoHConfig" structure with a key
+      using a KEM they do not support.
+
+   kdf_id  The HPKE KDF identifier corresponding to "public_key".
+      Clients MUST ignore any "ObliviousDoHConfig" structure with a key
+      using a KDF they do not support.
+
+   aead_id  The HPKE AEAD identifier corresponding to "public_key".
+      Clients MUST ignore any "ObliviousDoHConfig" structure with a key
+      using an AEAD they do not support.
+
+   public_key  The HPKE public key used by the client to encrypt
+      Oblivious DoH queries.
 
 7.  Oblivious DoH Message Format
 
@@ -359,19 +424,37 @@ Internet-Draft                Oblivious DoH                  August 2020
    Responses (0x02).  Both are encoded as follows:
 
    struct {
-      uint8  message_type;
       opaque key_id<0..2^16-1>;
+      uint8  message_type;
       opaque encrypted_message<1..2^16-1>;
-   } ObliviousDNSMessage;
+   } ObliviousDoHMessage;
 
-   ObliviousDNSMessage.message_type = 0x01 for Query messages and
-   ObliviousDNSMessage.message_type = 0x02 for Response messages.
-   ObliviousDNSMessage.key_id contains the identifier of the
-   corresponding ObliviousDNSKey key.
-   ObliviousDNSMessage.encrypted_message contains an encrypted message
-   for the Oblivious Target (for Query messages) or client (for Response
-   messages).  The following sections describe how these meessage bodies
-   are constructed.
+   The "ObliviousDoHMessage" structure contains the following fields:
+
+   message_type  A one-byte identifier for the type of message.  Query
+      messages use "message_type" 0x01, and Response messages use
+      "message_type" 0x02.
+
+   key_id  The identifier of the corresponding
+      "ObliviousDoHConfigContents" key.  This is computed as
+      "Expand(Extract("", config), "odoh_key_id", Nh)", where "config"
+      is the ObliviousDoHConfigContents structure and "Extract",
+      "Expand", and "Nh" are as specified by the HPKE cipher suite KDF
+      corresponding to "config.kdf_id".
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 8]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
+   encrypted_message  An encrypted message for the Oblivious Target (for
+      Query messages) or client (for Response messages).
+
+   The following sections describe how these message bodies are
+   constructed.
 
 7.1.  Oblivious Queries
 
@@ -387,46 +470,48 @@ Internet-Draft                Oblivious DoH                  August 2020
 
    The key and message are encoded using the following structure:
 
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 7]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
-
    struct {
       opaque dns_message<1..2^16-1>;
       opaque response_seed[32];
       opaque padding<0..2^16-1>;
-   } ObliviousDNSQueryBody;
+   } ObliviousDoHQueryBody;
 
    Let M be a DNS message a client wishes to protect with Oblivious DoH.
    When sending an Oblivious DoH Query for resolving M to an Oblivious
-   Target with ObliviousDNSKey key pk, a client does the following:
+   Target with ObliviousDoHConfigContents config, a client does the
+   following:
 
    1.  Generate a random response seed of length 32 octets according to
        the guidelines in [RFC4086].
 
-   2.  Create an ObliviousDNSQueryBody structure, carrying the message
+   2.  Create an ObliviousDoHQueryBody structure, carrying the message
        M, response_seed, and padding, to produce Q_plain.
 
-   3.  Unmarshal pk.public_key to produce a public key pkR of type
-       pk.kem_id.
+   3.  Deserialize config.public_key to produce a public key pkR of type
+       config.kem_id.
 
    4.  Compute the encrypted message as Q_encrypted =
-       encrypt_query_body(pkR, key_id, Q_plain). key_id is defined as
-       Identifier(pk).
+       encrypt_query_body(pkR, key_id, Q_plain), where "key_id" is as
+       computed in Section 7.  Note also that "len(key_id)" outputs the
+       length of "key_id" as a two-byte unsigned integer.
 
-   5.  Output a ObliviousDNSMessage message Q where Q.message_type =
-       0x01, Q.key_id carries Identifier(pk), and Q.encrypted_message =
-       Q_encrypted.
+   5.  Output a ObliviousDoHMessage message "Q" where "Q.message_type =
+       0x01", "Q.key_id" carries "key_id", and "Q.encrypted_message =
+       Q_encrypted".
+
+
+
+Kinnear, et al.           Expires 28 March 2021                 [Page 9]
+
+Internet-Draft                Oblivious DoH               September 2020
+
 
    The client then sends Q to the Oblivious Proxy according to
    Section 4.1.
 
    def encrypt_query_body(pkR, key_id, Q_plain):
-     enc, context = SetupBaseI(pkR, "odns-query")
-     aad = 0x01 || key_id
+     enc, context = SetupBaseS(pkR, "odoh-query")
+     aad = len(key_id) || key_id || 0x01
      ct = context.Seal(aad, Q_plain)
      Q_encrypted = enc || ct
      return Q_encrypted
@@ -434,30 +519,23 @@ Internet-Draft                Oblivious DoH                  August 2020
 7.2.  Oblivious Responses
 
    An Oblivious DoH Response message carries the DNS response
-   (dns_message) along with padding.  This message is encrypted with the
-   client's chosen response key.
+   (dns_message) along with padding.  This message is encrypted with a
+   key derived from the client's chosen seed and the corresponding DNS
+   query.
 
    struct {
       opaque dns_message<1..2^16-1>;
       opaque padding<0..2^16-1>;
-   } ObliviousDNSResponseBody;
-
-
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 8]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
+   } ObliviousDoHResponseBody;
 
    Targets that receive a Query message Q decrypt and process it as
    follows:
 
-   1.  Look up the ObliviousDNSKey according to Q.key_id.  If no such
-       key exists, the Target MAY discard the query.  Otherwise, let skR
-       be the private key corresponding to this public key, or one
-       chosen for trial decryption, and pk be the corresponding
-       ObliviousDNSKey.
+   1.  Look up the ObliviousDoHConfigContents according to Q.key_id.  If
+       no such key exists, the Target MAY discard the query.  Otherwise,
+       let skR be the private key corresponding to this public key, or
+       one chosen for trial decryption, and pk be the corresponding
+       ObliviousDoHConfigContents.
 
    2.  Compute Q_plain, error = decrypt_query_body(skR, Q.key_id,
        Q.encrypted_message).
@@ -466,45 +544,50 @@ Internet-Draft                Oblivious DoH                  August 2020
        zeros), resolve Q_plain.dns_message as needed, yielding a DNS
        message M.
 
-   4.  Create an ObliviousDNSResponseBody structure, carrying the
+   4.  Create an ObliviousDoHResponseBody structure, carrying the
        message M and padding, to produce R_plain.
 
-   5.  Compute akey, anonce = derive_keys(Q_plain).  (See definition for
-       derive_keys below.  Hash, Expand, Extract, Nn, and Nk are
-       functions and parameters bound to the target's HPKE public key.)
+   5.  Compute answer_key, answer_nonce = derive_secrets(Q_plain).  (See
+       definition for derive_secrets below.)
 
-   6.  Compute R_encrypted = encrypt_response_body(R_plain, akey,
-       anonce).  (See definition for encrypt_response_body below.  The
-       key_id field used for encryption is empty, yielding 0x0000 as
-       part of the AAD.)
 
-   7.  Output a ObliviousDNSMessage message R where R.message_type =
+
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 10]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
+   6.  Compute R_encrypted = encrypt_response_body(R_plain, answer_key,
+       answer_nonce).  See definition for encrypt_response_body below.
+       The "key_id" field used for encryption is empty, yielding
+       "0x0000" as part of the AAD.  Also, the "Seal" function is that
+       which is associated with the HPKE AEAD.
+
+   7.  Output a ObliviousDoHMessage message R where R.message_type =
        0x02, R.key_id = nil, and R.encrypted_message = R_encrypted.
 
-   def derive_keys(Q_plain):
-     context = Hash(Q_plain.dns_message)
-     key = Expand(Q_plain.response_seed, concat("odoh key", context), Nk)
-     nonce = Expand(Q_plain.response_seed, concat("odoh nonce", context), Nn)
+   def derive_secrets(Q_plain):
+     odoh_prk = Extract(Q_plain.dns_message, Q_plain.response_seed)
+     key = Expand(odoh_prk, "odoh key", Nk)
+     nonce = Expand(odoh_prk, "odoh nonce", Nn)
      return key, nonce
 
    def decrypt_query_body(skR, key_id, Q_encrypted):
      enc || ct = Q_encrypted
-     dec, context = SetupBaseR(skR, "odns-query")
-     aad = 0x01 || key_id
+     dec, context = SetupBaseR(skR, "odoh-query")
+     aad = len(key_id) || key_id || 0x01
      Q_plain, error = context.Open(aad, ct)
      return Q_plain, error
 
-   def encrypt_response_body(R_plain, akey, anonce):
-     aad = 0x02 || 0x0000 // 0x0000 represents a 0-length KeyId
-     R_encrypted = Seal(akey, anonce, aad, R_plain)
+   def encrypt_response_body(R_plain, answer_key, answer_nonce):
+     aad = 0x0000 || 0x02 // 0x0000 represents a 0-length KeyId
+     R_encrypted = Seal(answer_key, answer_nonce, aad, R_plain)
      return R_encrypted
-
-
-
-Kinnear, et al.         Expires 19 February 2021                [Page 9]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
 
    The Target then sends R to the Proxy according to Section 4.3.
 
@@ -518,7 +601,7 @@ Internet-Draft                Oblivious DoH                  August 2020
    zeros) before using R_plain.dns_message.
 
    def decrypt_response_body(R_encrypted):
-     aad = 0x02 || 0x0000
+     aad = 0x0000 || 0x02 // 0x0000 represents a 0-length KeyId
      R_plain = Open(response_key, 0^Nn, aad, R_encrypted)
      return R_plain
 
@@ -526,6 +609,14 @@ Internet-Draft                Oblivious DoH                  August 2020
 
    DISCLAIMER: this is a work in progress draft and has not yet seen
    significant security analysis.
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 11]
+
+Internet-Draft                Oblivious DoH               September 2020
+
 
    Oblivious DoH aims to keep knowledge of the true query origin and its
    contents known to only clients.  In particular, it assumes a Dolev-
@@ -549,18 +640,9 @@ Internet-Draft                Oblivious DoH                  August 2020
 
    Traffic analysis mitigations are outside the scope of this document.
    In particular, this document does not recommend padding lengths for
-   ObliviousDNSQueryBody and ObliviousDNSResponseBody messages.
+   ObliviousDoHQueryBody and ObliviousDoHResponseBody messages.
    Implementations SHOULD follow the guidance for choosing padding
    length in [RFC8467].
-
-
-
-
-
-Kinnear, et al.         Expires 19 February 2021               [Page 10]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
 
    Oblivious DoH security does not depend on proxy and target
    indistinguishability.  Specifically, an on-path attacker could
@@ -579,6 +661,19 @@ Internet-Draft                Oblivious DoH                  August 2020
    either the proxy or target is misbehaving.  Clients can choose to
    stop using one or both of these servers in the event of such failure.
 
+
+
+
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 12]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
 8.2.  General Proxy Services
 
    Using DoH over anonymizing proxy services such as Tor would also
@@ -587,10 +682,11 @@ Internet-Draft                Oblivious DoH                  August 2020
    undesirable in comparison Oblivious DoH:
 
    1.  Tor is also meant as a generic connection-level anonymity system,
-       and thus seems overly complex for the purpose of proxying
-       individual DoH queries.  In contrast, Oblivious DoH is a
-       lightweight extension to standard DoH that can be enabled as a
-       default mode for users which need increased privacy.
+       and thus seems overly complex and costly for the purpose of
+       proxying individual DoH queries.  In contrast, Oblivious DoH is a
+       lightweight extension to standard DoH, implemented as an
+       application-layer proxy, that can be enabled as a default mode
+       for users which need increased privacy.
 
    2.  As a one-hop proxy, Oblivious DoH encourages connection-less
        proxies to mitigate client query correlation with few round-
@@ -611,13 +707,6 @@ Internet-Draft                Oblivious DoH                  August 2020
 
    Subtype name: oblivious-dns-message
 
-
-
-Kinnear, et al.         Expires 19 February 2021               [Page 11]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
-
    Required parameters: N/A
 
    Optional parameters: N/A
@@ -632,6 +721,14 @@ Internet-Draft                Oblivious DoH                  August 2020
    conforming messages and the interpretation thereof.
 
    Published specification: This document.
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 13]
+
+Internet-Draft                Oblivious DoH               September 2020
+
 
    Applications that use this media type: This media type is intended to
    be used by clients wishing to hide their DNS queries when using DNS
@@ -653,26 +750,16 @@ Internet-Draft                Oblivious DoH                  August 2020
 9.2.  Oblivious DoH Public Key DNS Parameter
 
    This document defines one new key to be added to the Service Binding
-   (SVCB) Parameter Registry [I-D.nygren-dnsop-svcb-httpssvc].
+   (SVCB) Parameter Registry [I-D.ietf-dnsop-svcb-https].
 
-   Name:  odohkey
+   Name:  odohconfig
 
-   SvcParamKey:  TBD
+   SvcParamKey:  odohconfig
 
-   Meaning:  Public key used to encrypt messages in Oblivious DoH
+   Meaning:  Public key configuration used for encrypting Oblivious DoH
+      messages
 
    Reference:  This document.
-
-
-
-
-
-
-
-Kinnear, et al.         Expires 19 February 2021               [Page 12]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
 
 10.  Acknowledgments
 
@@ -685,6 +772,20 @@ Internet-Draft                Oblivious DoH                  August 2020
 
 11.1.  Normative References
 
+   [I-D.ietf-dnsop-svcb-https]
+              Schwartz, B., Bishop, M., and E. Nygren, "Service binding
+              and parameter specification via the DNS (DNS SVCB and
+              HTTPS RRs)", Work in Progress, Internet-Draft, draft-ietf-
+              dnsop-svcb-https-01, 13 July 2020, <http://www.ietf.org/
+              internet-drafts/draft-ietf-dnsop-svcb-https-01.txt>.
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 14]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
    [I-D.irtf-cfrg-hpke]
               Barnes, R., Bhargavan, K., Lipp, B., and C. Wood, "Hybrid
               Public Key Encryption", Work in Progress, Internet-Draft,
@@ -692,13 +793,12 @@ Internet-Draft                Oblivious DoH                  August 2020
               <http://www.ietf.org/internet-drafts/draft-irtf-cfrg-hpke-
               05.txt>.
 
-   [I-D.nygren-dnsop-svcb-httpssvc]
-              Schwartz, B., Bishop, M., and E. Nygren, "Service binding
-              and parameter specification via the DNS (DNS SVCB and
-              HTTPSSVC)", Work in Progress, Internet-Draft, draft-
-              nygren-dnsop-svcb-httpssvc-00, 23 September 2019,
-              <http://www.ietf.org/internet-drafts/draft-nygren-dnsop-
-              svcb-httpssvc-00.txt>.
+   [I-D.pauly-add-resolver-discovery]
+              Pauly, T., Kinnear, E., Wood, C., McManus, P., and T.
+              Jensen, "Adaptive DNS Resolver Discovery", Work in
+              Progress, Internet-Draft, draft-pauly-add-resolver-
+              discovery-01, 13 July 2020, <http://www.ietf.org/internet-
+              drafts/draft-pauly-add-resolver-discovery-01.txt>.
 
    [I-D.pauly-dprive-adaptive-dns-privacy]
               Kinnear, E., Pauly, T., Wood, C., and P. McManus,
@@ -722,14 +822,6 @@ Internet-Draft                Oblivious DoH                  August 2020
               Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
               <https://www.rfc-editor.org/info/rfc8446>.
 
-
-
-
-Kinnear, et al.         Expires 19 February 2021               [Page 13]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
-
    [RFC8467]  Mayrhofer, A., "Padding Policies for Extension Mechanisms
               for DNS (EDNS(0))", RFC 8467, DOI 10.17487/RFC8467,
               October 2018, <https://www.rfc-editor.org/info/rfc8467>.
@@ -739,6 +831,16 @@ Internet-Draft                Oblivious DoH                  August 2020
               <https://www.rfc-editor.org/info/rfc8484>.
 
 11.2.  Informative References
+
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 15]
+
+Internet-Draft                Oblivious DoH               September 2020
+
 
    [I-D.annee-dprive-oblivious-dns]
               Edmundson, A., Schmitt, P., Feamster, N., and A. Mankin,
@@ -777,27 +879,26 @@ Authors' Addresses
    Apple Inc.
    One Apple Park Way
    Cupertino, California 95014,
-
-
-
-
-Kinnear, et al.         Expires 19 February 2021               [Page 14]
-
-Internet-Draft                Oblivious DoH                  August 2020
-
-
    United States of America
 
    Email: tpauly@apple.com
 
 
    Christopher A. Wood
-   Apple Inc.
-   One Apple Park Way
-   Cupertino, California 95014,
+   Cloudflare
+   101 Townsend St
+   San Francisco,
    United States of America
 
-   Email: cawood@apple.com
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 16]
+
+Internet-Draft                Oblivious DoH               September 2020
+
+
+   Email: caw@heapingbits.net
 
 
 
@@ -837,4 +938,15 @@ Internet-Draft                Oblivious DoH                  August 2020
 
 
 
-Kinnear, et al.         Expires 19 February 2021               [Page 15]
+
+
+
+
+
+
+
+
+
+
+
+Kinnear, et al.           Expires 28 March 2021                [Page 17]

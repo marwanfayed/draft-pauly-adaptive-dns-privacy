@@ -5,13 +5,13 @@
 Network Working Group                                           T. Pauly
 Internet-Draft                                                E. Kinnear
 Intended status: Standards Track                              Apple Inc.
-Expires: 19 February 2021                                      C.A. Wood
+Expires: 28 March 2021                                         C.A. Wood
                                                               Cloudflare
                                                               P. McManus
                                                                   Fastly
                                                                T. Jensen
                                                                Microsoft
-                                                          18 August 2020
+                                                       24 September 2020
 
 
                     Adaptive DNS Resolver Discovery
@@ -40,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 February 2021.
+   This Internet-Draft will expire on 28 March 2021.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 1]
+Pauly, et al.             Expires 28 March 2021                 [Page 1]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    Please review these documents carefully, as they describe your rights
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 2]
+Pauly, et al.             Expires 28 March 2021                 [Page 2]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    Protocols that can improve the transport security of a client when
@@ -165,9 +165,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 3]
+Pauly, et al.             Expires 28 March 2021                 [Page 3]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    this agreement asserts to clients that sending any query to the
@@ -221,9 +221,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 4]
+Pauly, et al.             Expires 28 March 2021                 [Page 4]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    The rationale for using SVCB records for resolver discovery is
@@ -271,17 +271,19 @@ Internet-Draft               ADNS Discovery                  August 2020
    "https://doh.example.net/dns-query" would be available at
    "https://doh.example.net/.well-known/pvd/dns-query".
 
+
+
+
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 5]
+
+Internet-Draft               ADNS Discovery               September 2020
+
+
    The key "dohTemplate" is defined within the JSON dictionary
    (Section 9) to point back to the DoH URI Template itself.  This is
-
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 5]
-
-Internet-Draft               ADNS Discovery                  August 2020
-
-
    used for confirming the DoH server when the PvD is discovered locally
    or during zone apex confirmation (Section 3.3).
 
@@ -328,16 +330,16 @@ Internet-Draft               ADNS Discovery                  August 2020
    indicated in "trustedNames".  The client first issues an HTTP GET
    request by appending "/.well-known/pvd" to the trusted name, using
    the "https" scheme.  In order to validate the designation, the PvD
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 6]
+
+Internet-Draft               ADNS Discovery               September 2020
+
+
    JSON MUST contain a "dohTemplate" key pointing to the correct DoH
    resolver.  The client's query for the IP addresses of the trusted
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 6]
-
-Internet-Draft               ADNS Discovery                  August 2020
-
-
    name MAY use the DoH resolver prior to fully validating the
    designation, since the validation uses HTTPS to authenticate the
    designation.
@@ -382,23 +384,26 @@ Internet-Draft               ADNS Discovery                  August 2020
         "expires": "2020-08-23T06:00:00Z"
       }
 
+
+
+
+
+
+Pauly, et al.             Expires 28 March 2021                 [Page 7]
+
+Internet-Draft               ADNS Discovery               September 2020
+
+
    A client MUST NOT trust a designation if the JSON content is not
    present, does not contain a "dohTemplate" key, or the value in the
    "dohTemplate" key does not match.  The following result would not be
    acceptable for the example above:
 
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 7]
-
-Internet-Draft               ADNS Discovery                  August 2020
-
-
-      {
-        "identifier": "example.com.",
-        "dohTemplate": "https://not-the-doh-youre-looking-for.example.net/dns-query"
-        "expires": "2020-08-23T06:00:00Z"
-      }
+   {
+     "identifier": "example.com.",
+     "dohTemplate": "https://not-the-doh-youre-looking-for.example.net/dns-query"
+     "expires": "2020-08-23T06:00:00Z"
+   }
 
    Note that the domains listed in "trustedNames" may be broader than
    the zones that designate the resolver.  In the following example,
@@ -440,14 +445,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-
-
-
-
-
-Pauly, et al.           Expires 19 February 2021                [Page 8]
+Pauly, et al.             Expires 28 March 2021                 [Page 8]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
 4.  Explicit Discovery of Local Resolvers
@@ -501,9 +501,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021                [Page 9]
+Pauly, et al.             Expires 28 March 2021                 [Page 9]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    MUST be used whenever the original Direct Resolver would be used.
@@ -557,9 +557,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021               [Page 10]
+Pauly, et al.             Expires 28 March 2021                [Page 10]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    *  multiple designated DoH servers that are advertised via SVCB DNS
@@ -613,9 +613,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021               [Page 11]
+Pauly, et al.             Expires 28 March 2021                [Page 11]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
 8.  Privacy Considerations
@@ -651,7 +651,7 @@ Internet-Draft               ADNS Discovery                  August 2020
    This document adds a key to the "Additional Information PvD Keys"
    registry [I-D.ietf-intarea-provisioning-domains].
 
-   +------------+-------------+------+---------------------------------+
+   +============+=============+======+=================================+
    | JSON key   | Description | Type | Example                         |
    +============+=============+======+=================================+
    |dohTemplate | DoH URI     |String| "https://dnsserver.example.net/ |
@@ -669,12 +669,12 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021               [Page 12]
+Pauly, et al.             Expires 28 March 2021                [Page 12]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
-    +--------------+-----------------------+---------+---------------+
+    +==============+=======================+=========+===============+
     | JSON key     | Description           | Type    | Example       |
     +==============+=======================+=========+===============+
     | trustedNames | Names of servers that | Array   | [             |
@@ -725,9 +725,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021               [Page 13]
+Pauly, et al.             Expires 28 March 2021                [Page 13]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    [I-D.ietf-dnsop-svcb-https]
@@ -781,9 +781,9 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021               [Page 14]
+Pauly, et al.             Expires 28 March 2021                [Page 14]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    [RFC2132]  Alexander, S. and R. Droms, "DHCP Options and BOOTP Vendor
@@ -831,17 +831,20 @@ Appendix A.  Rationale for using SVCB records
       designated resolvers when issuing standard HTTPS queries
       (Section 3.1).
 
+
+
+
+
+
+
+Pauly, et al.             Expires 28 March 2021                [Page 15]
+
+Internet-Draft               ADNS Discovery               September 2020
+
+
    *  Clients and servers that are interested in privacy of names will
       already need to support SVCB records in order to use Encrypted TLS
       Client Hello [I-D.ietf-tls-esni].  Without encrypting names in
-
-
-
-Pauly, et al.           Expires 19 February 2021               [Page 15]
-
-Internet-Draft               ADNS Discovery                  August 2020
-
-
       TLS, the value of encrypting DNS is reduced, so pairing the
       solutions provides the largest benefit.
 
@@ -890,12 +893,9 @@ Authors' Addresses
 
 
 
-
-
-
-Pauly, et al.           Expires 19 February 2021               [Page 16]
+Pauly, et al.             Expires 28 March 2021                [Page 16]
 
-Internet-Draft               ADNS Discovery                  August 2020
+Internet-Draft               ADNS Discovery               September 2020
 
 
    Tommy Jensen
@@ -949,4 +949,4 @@ Internet-Draft               ADNS Discovery                  August 2020
 
 
 
-Pauly, et al.           Expires 19 February 2021               [Page 17]
+Pauly, et al.             Expires 28 March 2021                [Page 17]
